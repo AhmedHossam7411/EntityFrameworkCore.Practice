@@ -14,7 +14,7 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 namespace EFcore.data
 {
     
-    public  class FootballLeagueDbContext : DbContext  // code mebodiment of db
+    public  class FootballLeagueDbContext : DbContext  // code embodiment of db
     {
         
 
@@ -23,7 +23,7 @@ namespace EFcore.data
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string solutionDir = Directory.GetParent(baseDir).Parent.Parent.Parent.FullName;
 
-            string dbPath = Path.Combine(solutionDir, "FootballLeague_EFCore1.db");
+            dbPath = Path.Combine(solutionDir, "FootballLeague_EFCore.db");
 
             Console.WriteLine(" this is the path " + dbPath);
         }

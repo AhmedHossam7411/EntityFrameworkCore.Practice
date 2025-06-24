@@ -64,9 +64,16 @@ var nextButton = true;
     Page += 1;
 }*/
 
-var allTeams = await context.Teams.ToListAsync();
+/*var allTeams = await context.Teams.ToListAsync();
 foreach (var t in allTeams)
-    Console.WriteLine($"{t.TeamId} - {t.Name}");
+    Console.WriteLine($"{t.TeamId} - {t.Name}");*/
+
+var selector= await context.Teams.Select(team => team.Name).ToListAsync();// select only name and teamId
+foreach (var team in selector)
+{
+    Console.WriteLine($"{team}");
+}
+
 
 
 
