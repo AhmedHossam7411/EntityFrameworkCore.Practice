@@ -2,8 +2,8 @@
 
 public class Team : BaseDomainModel
 {
-    public int TeamId { get; set; }
-    public string? Name { get; set; }  // ? , can be null
-    
-
+    public int Id { get; set; }  // Primary key
+    public string? Name { get; set; }
+    public int LeagueId { get; set; }
+    public int CoachId { get; set; }
 }

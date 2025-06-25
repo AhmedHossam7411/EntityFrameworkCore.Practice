@@ -9,6 +9,10 @@ using System.Collections.Generic;
 FootballLeagueDbContext context = new FootballLeagueDbContext();
   
 
+    /*var allTeams = await context.Teams.ToListAsync();
+    foreach (var t in allTeams)
+
+        Console.WriteLine($"{t.TeamId} - {t.Name}");*/
 
  async Task listing()
     {
@@ -23,7 +27,7 @@ FootballLeagueDbContext context = new FootballLeagueDbContext();
 
         Console.WriteLine(firstTeam);
     }
-     async Task aggregateFunctions()
+ async Task aggregateFunctions()
     {
         var numberTeams = await context.Teams.CountAsync(); // count
         var numberTeamsCondition = await context.Teams.CountAsync(team => team.Name.Contains("l"));  // count with condition
@@ -33,7 +37,7 @@ FootballLeagueDbContext context = new FootballLeagueDbContext();
         var numberSum = await context.Teams.SumAsync(team => team.TeamId); // sum
     }
 
-     async Task grouping()
+ async Task grouping()
     {
         // group by
 
@@ -46,7 +50,7 @@ FootballLeagueDbContext context = new FootballLeagueDbContext();
             // Console.WriteLine(group);
         } // the grouping key  
     }
-     async Task ordering()
+ async Task ordering()
     {
         // Ordering :
 
@@ -58,7 +62,7 @@ FootballLeagueDbContext context = new FootballLeagueDbContext();
 
         // insert into teams
     }
-     async Task skipAndTake()
+ async Task skipAndTake()
     {
         // skip and take , useful for paging 
         var recordPerPage = 3;
@@ -75,11 +79,8 @@ FootballLeagueDbContext context = new FootballLeagueDbContext();
         }
     }
 
-    /*var allTeams = await context.Teams.ToListAsync();
-    foreach (var t in allTeams)
-        Console.WriteLine($"{t.TeamId} - {t.Name}");*/
 
-     async Task selector()
+async Task selector()
     {
         var selector = await context.Teams.Select(team => team.Name).ToListAsync();// select only name and teamId
         foreach (var team in selector)
@@ -118,10 +119,53 @@ await context.Coaches.AddRangeAsync(listInsert);
 
 }
 
+async Task updater()
+{
+    //updating
+    var coach = await context.Coaches.FirstOrDefaultAsync(c => c.Name == "Zinedine Zidane");
+    if (coach != null)
+    {
+        coach.Name = "Zinedine Zidane Updated";
+        await context.SaveChangesAsync();
+    }
 
+    var updating = await context.Coaches.FindAsync(2); // 2 primary key value
+    updating.Name = "Ahmed Hossam";// update name
+    await context.SaveChangesAsync();
 
+    // updating without tracking
+    var updatingWithoutTracking = await context.Coaches.FirstOrDefaultAsync(context => context.id == 2);
+    updatingWithoutTracking.Name = "Mohamed Salah"; // update name
+    context.Update(updatingWithoutTracking); // mark as modified
+    await context.SaveChangesAsync();
+}
+async Task deleting()
+{
+    //deleting without tracking
+    var coach = await context.Coaches.FirstOrDefaultAsync(c => c.Name == "Zinedine Zidane Updated");
+    if (coach != null)
+    {
+        context.Coaches.Remove(coach);
+        await context.SaveChangesAsync();
+    }
+    // deleting 
 
+    var coach1 = await context.Coaches.FindAsync(1); // 1 primary key value
+    context.Coaches.Remove(coach1);
+    context.Entry(coach).State = EntityState.Deleted; // mark as deleted
 
+    await context.SaveChangesAsync();
+}
 
+async Task ExecuteDeleteExecuteUpdate()
+{
+    // ExecuteDelete and ExecuteUpdate
+    // ExecuteDelete is used to delete multiple records in one go
+    // ExecuteUpdate is used to update multiple records in one go
+    // update using execute update
+
+    await context.Coaches.Where(c => c.Name == "Ahmed Hossam").ExecuteDeleteAsync(); // delete using execute delete
+    await context.Coaches.Where(c => c.Name == "Mohamed Salah").ExecuteUpdateAsync(c => c.SetProperty(p => p.Name, "Mohamed Salah Updated")); // update using execute update
+}
 
 

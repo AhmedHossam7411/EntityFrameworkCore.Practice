@@ -8,8 +8,7 @@ namespace EFcore.domain;  // following with EF core -full tour udemy course
 
 public class Coach : BaseDomainModel  // Data Model Or table 
 {
-   public int id {  get; set; }
-   public string? Name { get; set; }  // must not be null in db as awell
-   public DateTime CreatedDate { get; set; }
+    public string Name { get; set; }
+    public int? TeamId { get; set; }
 
 }

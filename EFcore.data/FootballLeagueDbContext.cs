@@ -29,6 +29,8 @@ namespace EFcore.data
         }
         public DbSet<Team> Teams { get; set; }
         public DbSet<Coach> Coaches { get; set; }
+        public DbSet<Match> Matches { get; set; }
+        public DbSet<league> leagues { get; set; }
 
         public string dbPath { get; set; }
 
@@ -45,20 +47,20 @@ namespace EFcore.data
             modelBuilder.Entity<Team>().HasData(
                 new Team
                 {
-                    TeamId = 1,           //Primary key is added manually in seeding
+                    Id = 1,           //Primary key is added manually in seeding
                     Name = "Fiorentina",
                     CreatedDate = new DateTime(2025, 06, 19)
                 },
 
                 new Team
                 {
-                    TeamId = 2,           //Primary key is added manually in seeding
+                    Id = 2,           //Primary key is added manually in seeding
                     Name = "Realmadrid",
                     CreatedDate = new DateTime(2025, 06, 19)
                 },
                 new Team
                 {
-                    TeamId = 3,           //Primary key is added manually in seeding
+                    Id = 3,           //Primary key is added manually in seeding
                     Name = "Liverpool",
                     CreatedDate = new DateTime(2025, 06, 19)
                 }
