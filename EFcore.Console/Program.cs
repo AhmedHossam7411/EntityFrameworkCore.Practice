@@ -23,7 +23,7 @@ FootballLeagueDbContext context = new FootballLeagueDbContext();
             Console.WriteLine(item.Name);
         }
         var firstTeam = await context.Teams.Where
-        (team => team.TeamId > 1).ToListAsync();
+                (team => team.Id > 1).ToListAsync();
 
         Console.WriteLine(firstTeam);
     }
