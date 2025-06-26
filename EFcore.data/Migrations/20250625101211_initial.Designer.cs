@@ -3,6 +3,7 @@ using System;
 using EFcore.data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EFcore.data.Migrations
 {
     [DbContext(typeof(FootballLeagueDbContext))]
-    partial class FootballLeagueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250625101211_initial")]
+    partial class initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
@@ -56,9 +59,6 @@ namespace EFcore.data.Migrations
                     b.Property<int>("AwayTeamId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AwayTeamScore")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("CreatedBy")
                         .HasColumnType("TEXT");
 
@@ -71,9 +71,6 @@ namespace EFcore.data.Migrations
                     b.Property<int>("HomeTeamId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("HomeTeamScore")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("ModifiedBy")
                         .HasColumnType("TEXT");
 
@@ -84,10 +81,6 @@ namespace EFcore.data.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AwayTeamId");
-
-                    b.HasIndex("HomeTeamId");
 
                     b.ToTable("Matches");
                 });
@@ -117,18 +110,9 @@ namespace EFcore.data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CoachId")
-                        .IsUnique();
-
-                    b.HasIndex("LeagueId");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("Teams");
 
@@ -203,58 +187,6 @@ namespace EFcore.data.Migrations
                             ModifiedDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Egyptian Premier Team"
                         });
-                });
-
-            modelBuilder.Entity("EFcore.domain.Match", b =>
-                {
-                    b.HasOne("EFcore.domain.Team", "AwayTeam")
-                        .WithMany("AwayMatches")
-                        .HasForeignKey("AwayTeamId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EFcore.domain.Team", "HomeTeam")
-                        .WithMany("HomeMatches")
-                        .HasForeignKey("HomeTeamId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("AwayTeam");
-
-                    b.Navigation("HomeTeam");
-                });
-
-            modelBuilder.Entity("EFcore.domain.Team", b =>
-                {
-                    b.HasOne("EFcore.domain.Coach", "Coach")
-                        .WithOne("Team")
-                        .HasForeignKey("EFcore.domain.Team", "CoachId");
-
-                    b.HasOne("EFcore.domain.league", "league")
-                        .WithMany("Teams")
-                        .HasForeignKey("LeagueId");
-
-                    b.Navigation("Coach");
-
-                    b.Navigation("league");
-                });
-
-            modelBuilder.Entity("EFcore.domain.Coach", b =>
-                {
-                    b.Navigation("Team")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("EFcore.domain.Team", b =>
-                {
-                    b.Navigation("AwayMatches");
-
-                    b.Navigation("HomeMatches");
-                });
-
-            modelBuilder.Entity("EFcore.domain.league", b =>
-                {
-                    b.Navigation("Teams");
                 });
 #pragma warning restore 612, 618
         }

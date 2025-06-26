@@ -1,9 +1,17 @@
-﻿namespace EFcore.domain;   // following with EF core -full tour udemy course
+﻿using EFcore.domain;
+
+namespace EFcore.domain;
 
 public class Team : BaseDomainModel
 {
-    public int Id { get; set; }  // Primary key
-    public string? Name { get; set; }
-    public int LeagueId { get; set; }
-    public int CoachId { get; set; }
+    public string Name { get; set; }
+
+    public league league { get; set; } // for one to many relationship
+    public int? LeagueId { get; set; }
+
+    public int? CoachId { get; set; } //team needs a coach 
+    public Coach Coach { get; set; } // navigation property to Coach
+    
+    public List<Match> HomeMatches { get; set; } = new List<Match>() { };
+    public List<Match> AwayMatches { get; set; } = new List<Match>() { };
 }

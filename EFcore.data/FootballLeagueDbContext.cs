@@ -9,14 +9,16 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Identity.Client;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using EFcore.data.Configurations;
+using EFcore.domain;
 
 
 namespace EFcore.data
 {
-    
-    public  class FootballLeagueDbContext : DbContext  // code embodiment of db
+
+    public class FootballLeagueDbContext : DbContext  // code embodiment of db
     {
-        
+
 
         public FootballLeagueDbContext()
         {
@@ -44,27 +46,9 @@ namespace EFcore.data
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Team>().HasData(
-                new Team
-                {
-                    Id = 1,           //Primary key is added manually in seeding
-                    Name = "Fiorentina",
-                    CreatedDate = new DateTime(2025, 06, 19)
-                },
+            modelBuilder.ApplyConfiguration(new TeamConfigurations());         // Apply the TeamConfigurations class to configure the Team entity
+            modelBuilder.ApplyConfiguration(new leagueConfigurations());  // Apply the leagueConfigurations class to configure the Team entity
 
-                new Team
-                {
-                    Id = 2,           //Primary key is added manually in seeding
-                    Name = "Realmadrid",
-                    CreatedDate = new DateTime(2025, 06, 19)
-                },
-                new Team
-                {
-                    Id = 3,           //Primary key is added manually in seeding
-                    Name = "Liverpool",
-                    CreatedDate = new DateTime(2025, 06, 19)
-                }
-                );  // now i need to add a migration
         }
     }
 }

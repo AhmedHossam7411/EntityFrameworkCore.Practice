@@ -1,93 +1,201 @@
-﻿using EFcore.data;
+﻿using Azure;
+using EFcore.data;
 using EFcore.domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Linq;
 
 
 FootballLeagueDbContext context = new FootballLeagueDbContext();
-  
-
-    /*var allTeams = await context.Teams.ToListAsync();
-    foreach (var t in allTeams)
-
-        Console.WriteLine($"{t.TeamId} - {t.Name}");*/
-
- async Task listing()
+async Task ListingTypes()
+{
+    // Listing types
+    var coaches = await context.Coaches.ToListAsync();
+    foreach (var coach in coaches)
     {
-        var teams = context.Teams.ToList();
+        Console.WriteLine(coach.Name);
+    }
 
-        foreach (var item in teams)
+    var coach2Query = await context.Coaches.ToListAsync();
+    foreach (var item in coach2Query)
+    {
+        Console.WriteLine(item.Name);
+    }
+
+    var key = Console.ReadKey();
+
+    switch (key)
+    {
+        case { Key: ConsoleKey.A }:
+            var coach = await context.Coaches.Include(c => c.Team).ElementAtAsync(1);
+            Console.WriteLine($"coach Name {coach.Name} - Team Name {coach.Team.Name}");
+            break;
+        case { Key: ConsoleKey.B }:
+            var coach2 = await context.Coaches.Include(c => c.Team).ElementAtAsync(2);
+            Console.WriteLine($"coach Name {coach2.Name} - Team Name {coach2.Team.Name}");
+            break;
+
+        default:
+            break;
+    }
+}
+
+async Task InsertingData()
+{
+    /* var match = context.Matches.Add(new Match
+    {
+        HomeTeamId = 1,
+        AwayTeamId = 2,
+        HomeTeamScore = 2,
+        AwayTeamScore = 1,
+        CreatedDate = DateTime.Now,
+        TicketPrice = 50,
+        Date = DateTime.Now
+    });*/
+}
+/*---- 
+list coaches names 
+
+select coach 
+get team detatils 
+*/
+var league = new league
+{
+    Name = "Serie A",
+    Teams = new List<Team>
+    {
+        new Team
         {
-            Console.WriteLine(item.Name);
+            Name="zamalek",
+
+        },
+        new Team
+        {
+            Name="somouha"
         }
-        var firstTeam = await context.Teams.Where
+    }
+};
+context.leagues.Add(league);
+context.SaveChanges();
+
+/*
+try
+{
+    var coach = new Coach
+    {
+        Name = "Pep Guardiola",
+        CreatedDate = DateTime.Now
+    };
+
+    await context.Coaches.AddAsync(coach);
+    await context.SaveChangesAsync(); // CoachId is now available
+
+    var team = new Team
+    {
+        Name = "Manchester City",
+        CreatedDate = DateTime.Now,
+        CoachId = coach.Id // Use the actual generated ID
+    };
+
+    await context.Teams.AddAsync(team);
+    await context.SaveChangesAsync(); // Save the team
+    Console.WriteLine("Coach and Team added successfully.");
+}
+catch (Exception ex)
+{
+    Console.WriteLine("❌ Error occurred: " + ex.Message);
+}*/
+
+
+async Task sqlSyntax()
+{
+    var teamQuery = context.Teams.Skip(1)
+                    .Take(1);
+    var sqlQuery = teamQuery.ToQueryString();
+    var teams = await teamQuery.ToListAsync();
+    Console.WriteLine(sqlQuery); // this will print the sql query that will be executed
+}
+
+/*var allTeams = await context.Teams.ToListAsync();
+foreach (var t in allTeams)
+
+    Console.WriteLine($"{t.TeamId} - {t.Name}");*/
+async Task listing()
+{
+    var teams = context.Teams.ToList();
+
+    foreach (var item in teams)
+    {
+        Console.WriteLine(item.Name);
+    }
+    var firstTeam = await context.Teams.Where
                 (team => team.Id > 1).ToListAsync();
 
-        Console.WriteLine(firstTeam);
-    }
- async Task aggregateFunctions()
+    Console.WriteLine(firstTeam);
+}
+async Task aggregateFunctions()
+{
+    var numberTeams = await context.Teams.CountAsync(); // count
+    var numberTeamsCondition = await context.Teams.CountAsync(team => team.Name.Contains("l"));  // count with condition
+    var numberMax = await context.Teams.MaxAsync(team => team.Name.Contains("l")); // max number
+    var numberMin = await context.Teams.MinAsync(team => team.CreatedDate); // min number for condition
+    var numberAvg = await context.Teams.AverageAsync(team => team.Id); // avg
+    var numberSum = await context.Teams.SumAsync(team => team.Id); // sum
+}
+
+async Task grouping()
+{
+    // group by
+
+    var groupedTeams = context.Teams.Where(q => q.Name.Contains($"l"))
+        .GroupBy(team => team.CreatedDate);// Filter first then , group on created date
+
+    foreach (var group in groupedTeams)
     {
-        var numberTeams = await context.Teams.CountAsync(); // count
-        var numberTeamsCondition = await context.Teams.CountAsync(team => team.Name.Contains("l"));  // count with condition
-        var numberMax = await context.Teams.MaxAsync(team => team.Name.Contains("l")); // max number
-        var numberMin = await context.Teams.MinAsync(team => team.CreatedDate); // min number for condition
-        var numberAvg = await context.Teams.AverageAsync(team => team.TeamId); // avg
-        var numberSum = await context.Teams.SumAsync(team => team.TeamId); // sum
-    }
+        Console.WriteLine(group.Key);
+        // Console.WriteLine(group);
+    } // the grouping key  
+}
+async Task ordering()
+{
+    // Ordering :
 
- async Task grouping()
+    var orderedTeams = context.Teams.OrderByDescending(o => o.Id);
+    foreach (var team in orderedTeams) Console.WriteLine(team.Name);
+
+    //var maxby = context.Teams.MaxBy(q => q.TeamId);
+    //Console.WriteLine(maxby.Name);           // crashes because EF core cant convert this to sql , can use AsEnumerable OR use OrderBy 
+
+    // insert into teams
+}
+async Task skipAndTake()
+{
+    // skip and take , useful for paging 
+    var recordPerPage = 3;
+    var Page = 0;
+    var nextButton = true;
+    while (nextButton)
     {
-        // group by
-
-        var groupedTeams = context.Teams.Where(q => q.Name.Contains($"l"))
-            .GroupBy(team => team.CreatedDate);// Filter first then , group on created date
-
-        foreach (var group in groupedTeams)
-        {
-            Console.WriteLine(group.Key);
-            // Console.WriteLine(group);
-        } // the grouping key  
+        var teamer = await context.Teams.Skip(Page * recordPerPage)
+            .Take(recordPerPage).ToListAsync();
+        foreach (var team in teamer) Console.WriteLine(team.Name);
+        nextButton = Convert.ToBoolean(Console.ReadLine());
+        if (!nextButton) break;
+        Page += 1;
     }
- async Task ordering()
-    {
-        // Ordering :
-
-        var orderedTeams = context.Teams.OrderByDescending(o => o.TeamId);
-        foreach (var team in orderedTeams) Console.WriteLine(team.Name);
-
-        //var maxby = context.Teams.MaxBy(q => q.TeamId);
-        //Console.WriteLine(maxby.Name);           // crashes because EF core cant convert this to sql , can use AsEnumerable OR use OrderBy 
-
-        // insert into teams
-    }
- async Task skipAndTake()
-    {
-        // skip and take , useful for paging 
-        var recordPerPage = 3;
-        var Page = 0;
-        var nextButton = true;
-        while (nextButton)
-        {
-            var teamer = await context.Teams.Skip(Page * recordPerPage)
-                .Take(recordPerPage).ToListAsync();
-            foreach (var team in teamer) Console.WriteLine(team.Name);
-            nextButton = Convert.ToBoolean(Console.ReadLine());
-            if (!nextButton) break;
-            Page += 1;
-        }
-    }
+}
 
 
 async Task selector()
+{
+    var selector = await context.Teams.Select(team => team.Name).ToListAsync();// select only name and teamId
+    foreach (var team in selector)
     {
-        var selector = await context.Teams.Select(team => team.Name).ToListAsync();// select only name and teamId
-        foreach (var team in selector)
-        {
-            Console.WriteLine($"{team}");
-        }
+        Console.WriteLine($"{team}");
     }
+}
 async Task inserting()
 {
     //inserting
@@ -107,6 +215,12 @@ async Task inserting()
     new Coach { Name = "Jurgen Klopp", CreatedDate = DateTime.Now },
     new Coach { Name = "Antonio Conte", CreatedDate = DateTime.Now }
 };
+    var coach = listInsert.First();
+    var str = $"{coach.Name} => {coach}";
+
+
+
+   
     foreach (var item in listInsert)
     {
         await context.Coaches.AddAsync(item);
@@ -114,7 +228,7 @@ async Task inserting()
     await context.SaveChangesAsync();
 
     //batch insert
-await context.Coaches.AddRangeAsync(listInsert);
+    await context.Coaches.AddRangeAsync(listInsert);
     await context.SaveChangesAsync();
 
 }
@@ -134,7 +248,7 @@ async Task updater()
     await context.SaveChangesAsync();
 
     // updating without tracking
-    var updatingWithoutTracking = await context.Coaches.FirstOrDefaultAsync(context => context.id == 2);
+    var updatingWithoutTracking = await context.Coaches.FirstOrDefaultAsync(context => context.TeamId == 2);
     updatingWithoutTracking.Name = "Mohamed Salah"; // update name
     context.Update(updatingWithoutTracking); // mark as modified
     await context.SaveChangesAsync();

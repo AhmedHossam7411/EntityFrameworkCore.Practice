@@ -3,6 +3,7 @@ using System;
 using EFcore.data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EFcore.data.Migrations
 {
     [DbContext(typeof(FootballLeagueDbContext))]
-    partial class FootballLeagueDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250626082735_manyToMany")]
+    partial class manyToMany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
@@ -39,7 +42,7 @@ namespace EFcore.data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("TeamId")
+                    b.Property<int>("TeamId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -117,13 +120,9 @@ namespace EFcore.data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CoachId")
-                        .IsUnique();
 
                     b.HasIndex("LeagueId");
 
@@ -226,23 +225,11 @@ namespace EFcore.data.Migrations
 
             modelBuilder.Entity("EFcore.domain.Team", b =>
                 {
-                    b.HasOne("EFcore.domain.Coach", "Coach")
-                        .WithOne("Team")
-                        .HasForeignKey("EFcore.domain.Team", "CoachId");
-
                     b.HasOne("EFcore.domain.league", "league")
                         .WithMany("Teams")
                         .HasForeignKey("LeagueId");
 
-                    b.Navigation("Coach");
-
                     b.Navigation("league");
-                });
-
-            modelBuilder.Entity("EFcore.domain.Coach", b =>
-                {
-                    b.Navigation("Team")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("EFcore.domain.Team", b =>
