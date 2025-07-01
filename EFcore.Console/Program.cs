@@ -9,6 +9,21 @@ using System.Linq;
 
 
 FootballLeagueDbContext context = new FootballLeagueDbContext();
+
+async Task filteringInclude()
+{
+var filterer = context.leagues.Include(q => q.Teams).Where(q => q.Name.Contains("A")).ToListAsync();
+foreach (var item in filterer.Result)
+{
+    Console.WriteLine(item.Name);
+    foreach (var team in item.Teams)
+    {
+        Console.WriteLine(team.Name);
+    }
+}
+
+}
+
 async Task ListingTypes()
 {
     // Listing types
@@ -54,17 +69,11 @@ async Task InsertingData()
         TicketPrice = 50,
         Date = DateTime.Now
     });*/
-}
-/*---- 
-list coaches names 
 
-select coach 
-get team detatils 
-*/
-var league = new league
-{
-    Name = "Serie A",
-    Teams = new List<Team>
+    var league = new league
+    {
+        Name = "Serie A",
+        Teams = new List<Team>
     {
         new Team
         {
@@ -76,39 +85,61 @@ var league = new league
             Name="somouha"
         }
     }
-};
-context.leagues.Add(league);
-context.SaveChanges();
-
-/*
-try
-{
-    var coach = new Coach
-    {
-        Name = "Pep Guardiola",
-        CreatedDate = DateTime.Now
     };
+    context.leagues.Add(league);
+    context.SaveChanges();
 
-    await context.Coaches.AddAsync(coach);
-    await context.SaveChangesAsync(); // CoachId is now available
-
-    var team = new Team
+    /*
+    try
     {
-        Name = "Manchester City",
-        CreatedDate = DateTime.Now,
-        CoachId = coach.Id // Use the actual generated ID
-    };
+        var coach = new Coach
+        {
+            Name = "Pep Guardiola",
+            CreatedDate = DateTime.Now
+        };
 
-    await context.Teams.AddAsync(team);
-    await context.SaveChangesAsync(); // Save the team
-    Console.WriteLine("Coach and Team added successfully.");
+        await context.Coaches.AddAsync(coach);
+        await context.SaveChangesAsync(); // CoachId is now available
+
+        var team = new Team
+        {
+            Name = "Manchester City",
+            CreatedDate = DateTime.Now,
+            CoachId = coach.Id // Use the actual generated ID
+        };
+
+        await context.Teams.AddAsync(team);
+        await context.SaveChangesAsync(); // Save the team
+        Console.WriteLine("Coach and Team added successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("❌ Error occurred: " + ex.Message);
+    }*/
 }
-catch (Exception ex)
+async Task explicitLoading()
 {
-    Console.WriteLine("❌ Error occurred: " + ex.Message);
-}*/
 
+    var league = context.leagues.Include(q => q.Teams).ToList();
 
+    foreach (var l in league)
+    {
+        Console.WriteLine(l.Name);
+        foreach (var team in l.Teams)
+        {
+            Console.WriteLine(team.Name);
+        }
+    }
+    var leagues = await context.leagues.FindAsync(4);
+    await context.Entry(leagues)
+        .Collection(q => q.Teams)
+        .LoadAsync();
+
+    foreach (var item in leagues.Teams)
+    {
+        Console.WriteLine(item.Name);
+    }// eager loading
+}
 async Task sqlSyntax()
 {
     var teamQuery = context.Teams.Skip(1)
