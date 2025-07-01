@@ -1,6 +1,7 @@
 ﻿using Azure;
 using EFcore.data;
 using EFcore.domain;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using System.Collections.Frozen;
@@ -10,6 +11,61 @@ using System.Linq;
 
 FootballLeagueDbContext context = new FootballLeagueDbContext();
 
+void OtherRawQueries()
+{
+    /* Executing Stored Procedures
+    var leagueId = 1;
+    var league = context.Leagues
+        .FromSqlInterpolated($"EXEC dbo.StoredProcedureToGetLeagueNameHere {leagueId}");*/
+
+    // Non-querying statement 
+    var someName = "Random Team Name";
+    context.Database.ExecuteSqlInterpolated($"UPDATE Teams SET Name = {someName}");
+
+    int matchId = 1;
+    context.Database.ExecuteSqlInterpolated($"EXEC dbo.DeleteMatch {matchId}");
+
+    // Query Scalar or Non-Entity Type
+    var leagueIds = context.Database.SqlQuery<int>($"SELECT Id FROM Leagues")
+        .ToList();
+
+    // Execute User-Defined Query
+    //var earliestMatch = context.GetEarliestTeamMatch(1);
+}
+async Task sqlSyntax()
+{
+    Console.WriteLine("enter team name");
+    var teamName = Console.ReadLine();
+    var teamNameParam = new SqliteParameter("TeamName", teamName);
+    var teams = context.Teams.FromSqlRaw($"select * from Teams where Name = @TeamName", teamNameParam);
+    foreach (var team in teams)
+    {
+        Console.WriteLine(team.Name);
+    }
+
+     // FROM SQL
+  teams = context.Teams.FromSql($"SELECT * FROM Teams WHERE name = {teamName}");
+    foreach (var t in teams)
+    {
+        Console.WriteLine(t);
+    }
+
+     // FROM SQL INTERPOLATED
+
+     teams = context.Teams.FromSqlInterpolated($"SELECT * FROM Teams WHERE name = {teamName}");
+    foreach (var t in teams)
+    {
+        Console.WriteLine(t);
+    }
+}
+async Task queryKeylessEntity() { 
+var viewer = await context.TeamsAndLeaguesView.ToListAsync(); 
+foreach (var item in viewer)
+{
+    Console.WriteLine($"Team Name: {item.Name} ");
+}
+
+}
 async Task filteringInclude()
 {
 var filterer = context.leagues.Include(q => q.Teams).Where(q => q.Name.Contains("A")).ToListAsync();
@@ -140,7 +196,7 @@ async Task explicitLoading()
         Console.WriteLine(item.Name);
     }// eager loading
 }
-async Task sqlSyntax()
+async Task sqlLinQ()
 {
     var teamQuery = context.Teams.Skip(1)
                     .Take(1);

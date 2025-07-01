@@ -6,8 +6,8 @@ public class Team : BaseDomainModel
 {
     public string Name { get; set; }
 
-    public league league { get; set; } // for one to many relationship
-    public int? LeagueId { get; set; }
+    public league league { get; set; } // for one to many relationship , nav property to League
+    public int? LeagueId { get; set; } // foreign key to League
 
     public int? CoachId { get; set; } //team needs a coach 
     public Coach Coach { get; set; } // navigation property to Coach

@@ -33,6 +33,7 @@ namespace EFcore.data
         public DbSet<Coach> Coaches { get; set; }
         public DbSet<Match> Matches { get; set; }
         public DbSet<league> leagues { get; set; }
+        public DbSet<TeamsAndLeaguesView> TeamsAndLeaguesView { get; set; }
 
         public string dbPath { get; set; }
 
@@ -48,7 +49,11 @@ namespace EFcore.data
         {
             modelBuilder.ApplyConfiguration(new TeamConfigurations());         // Apply the TeamConfigurations class to configure the Team entity
             modelBuilder.ApplyConfiguration(new leagueConfigurations());  // Apply the leagueConfigurations class to configure the Team entity
-
+            modelBuilder.Entity<TeamsAndLeaguesView>(entity =>
+            {
+                entity.HasNoKey(); // This is a view, so it doesn't have a primary key
+                entity.ToView("LeagueDetails"); // Specify the name of the view in the database
+            });
         }
     }
 }
