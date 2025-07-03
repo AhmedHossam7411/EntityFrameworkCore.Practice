@@ -10,7 +10,7 @@ public class Team : BaseDomainModel
     public int? LeagueId { get; set; } // foreign key to League
 
     public int? CoachId { get; set; } //team needs a coach 
-    public Coach Coach { get; set; } // navigation property to Coach
+    public Coach Coach { get; set; } // navigation property to Coach .
          // For SQL Server Only
          //[Timestamp]
          //public byte[] Version { get; set; }
