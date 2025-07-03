@@ -11,7 +11,10 @@ public class Team : BaseDomainModel
 
     public int? CoachId { get; set; } //team needs a coach 
     public Coach Coach { get; set; } // navigation property to Coach
-    
+         // For SQL Server Only
+         //[Timestamp]
+         //public byte[] Version { get; set; }
+
     public List<Match> HomeMatches { get; set; } = new List<Match>() { };
     public List<Match> AwayMatches { get; set; } = new List<Match>() { };
 }

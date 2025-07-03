@@ -15,7 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+
 
 
 namespace EFcore.data
@@ -24,9 +24,9 @@ namespace EFcore.data
     public class FootballLeagueDbContext : DbContext  // code embodiment of db
     {
 
+
         public FootballLeagueDbContext(DbContextOptions<FootballLeagueDbContext> options) : base(options)
         {
-
         }
         public DbSet<Team> Teams { get; set; }
         public DbSet<Coach> Coaches { get; set; }
@@ -35,9 +35,27 @@ namespace EFcore.data
         public DbSet<TeamsAndLeaguesView> TeamsAndLeaguesView { get; set; }
 
         public string dbPath { get; set; }
+        public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)  // overriding SaveChangesAsync method to add custom logic before saving changes
+        {
+            // Custom logic before saving changes
+            var entries = ChangeTracker.Entries<BaseDomainModel>()
+                .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+            foreach (var entry in entries)
+            {
+                entry.Entity.ModifiedDate = DateTime.Now; // Set the ModifiedDate to the current time
+                if (entry.State == EntityState.Added)
+                {
+                    entry.Entity.CreatedDate = DateTime.Now; // Set CreatedDate for new entities
+                }
+            }
+
+            // Call the base method to save changes
+            return base.SaveChangesAsync(cancellationToken);
+        }
+
 
         //start by typing override
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new TeamConfigurations());         // Apply the TeamConfigurations class to configure the Team entity

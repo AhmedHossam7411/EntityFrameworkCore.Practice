@@ -3,13 +3,96 @@ using EFcore.data;
 using EFcore.domain;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using Microsoft.Extensions.Options;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 
 
-FootballLeagueDbContext context = new FootballLeagueDbContext();
+var optionsBuilder = new DbContextOptionsBuilder<FootballLeagueDbContext>();
+optionsBuilder.UseSqlite("FootballLeague_EFCore.db");
+
+var context = new FootballLeagueDbContext(optionsBuilder.Options);
+
+void TransactionSupport()
+{
+    var transaction = context.Database.BeginTransaction();
+    var league = new league
+    {
+        Name = "Testing Transactions"
+    };
+
+    context.Add(league);
+    context.SaveChanges();
+    transaction.CreateSavepoint("CreatedLeague");
+
+    var coach = new Coach
+    {
+        Name = "Transaction Coach"
+    };
+
+    context.Add(coach);
+    context.SaveChanges();
+
+    var teams = new List<Team>
+{
+    new Team
+    {
+        Name = "Transaction Team 1",
+        LeagueId = league.Id,
+        CoachId = coach.Id
+    }
+};
+    context.AddRange(teams);
+    context.SaveChanges();
+
+    try
+    {
+        transaction.Commit();
+    }
+    catch (Exception)
+    {
+        // Roll back entire operation
+        //transaction.Rollback();
+
+        // Rollback to specific point 
+        transaction.RollbackToSavepoint("CreatedLeague");
+        throw;
+    }
+}
+
+/* void TemporalTableQuery()
+{
+    var teamHistory = context.Teams   // needs sql server
+        .TemporalAll()
+        .Where(q => q.Id == 1)
+        .Select(team => new
+        {
+            team.Name,
+            ValueFrom = EF.Property<DateTime>(team, "PeriodStart"),
+            ValueTo = EF.Property<DateTime>(team, "PeriodEnd"),
+        })
+        .ToList();
+
+    foreach (var record in teamHistory)
+    {
+        Console.WriteLine($"{record.Name} | From {record.ValueFrom} | To {record.ValueTo}");
+    }
+}*/
+
+//overriding savechanges in dbcontext class
+// new objects with overrided save changes method / new audits
+async Task InsertOneRecordWithAudit()
+{
+    var newLeague = new league
+    {
+        Name = "New League With Audit"
+    };
+    await context.AddAsync(newLeague);
+    await context.SaveChangesAsync();
+}
 
 void OtherRawQueries()
 {
